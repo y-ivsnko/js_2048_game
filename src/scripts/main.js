@@ -3,63 +3,57 @@
 const Game = require('../modules/Game.class');
 const game = new Game();
 
-const rows = [...document.querySelectorAll('tr')];
-const button = document.querySelector('.button');
+const rows = Array.from(document.querySelectorAll('.field-row'));
+
+const buttonStart = document.querySelector('button');
+
 const score = document.querySelector('.game-score');
 
-const messageLose = document.querySelector('.message-lose');
-const messageWin = document.querySelector('.message-win');
 const messageStart = document.querySelector('.message-start');
+const messageWin = document.querySelector('.message-win');
+const messageLose = document.querySelector('.message-lose');
 
-button.addEventListener('click', (e) => {
+buttonStart.addEventListener('click', (e) => {
   e.target.textContent = 'Restart';
-  button.className = 'button restart';
+  game.status = 'playing';
+  buttonStart.className = 'button restart';
 
   if (game.status === 'idle') {
-    // eslint-disable-next-line no-unused-expressions
-    game.restart();
-    game.setValue();
-    game.setValue();
     game.status = 'playing';
-
     updateBoard(game.board);
-    updateMessage();
+    updateMessages();
 
     return;
   }
 
   if (game.status === 'playing' || game.status === 'lose') {
-    updateMessage();
-
+    updateMessages();
     game.restart();
-    game.setValue();
-    game.setValue();
-
+    game.startNumbers();
     game.status = 'playing';
-
     updateBoard(game.board);
   }
 });
 
-function updateMessage() {
-  const point = game.getStatus();
+function updateMessages() {
+  const stat = game.getStatus();
 
-  messageLose.classList.add('hidden');
-  messageWin.classList.add('hidden');
   messageStart.classList.add('hidden');
+  messageWin.classList.add('hidden');
+  messageLose.classList.add('hidden');
 
-  if (game.isMoves(game.board) === false) {
-    // eslint-disable-next-line no-unused-expressions
+  if (game.hasOtherMoves(game.board) === false) {
     game.status = 'lose';
-    button.className = 'button restart';
-    button.textContent = 'Restart';
+    buttonStart.className = 'button restart';
+    buttonStart.textContent = 'Restart';
   }
 
-  if (point === 'idle') {
+  if (stat === 'idle') {
     messageStart.classList.remove('hidden');
-  } else if (point === 'win') {
+  } else if (stat === 'playing') {
+  } else if (stat === 'win') {
     messageWin.classList.remove('hidden');
-  } else if (point === 'lose') {
+  } else if (stat === 'lose') {
     messageLose.classList.remove('hidden');
   }
 }
@@ -71,12 +65,12 @@ function updateBoard(board) {
 
       if (board[row][col] !== 0) {
         Array.from(rows[row].children)[col].className =
-          `field-cell--${board[row][col]}`;
+          `field-cell field-cell--${board[row][col]}`;
       }
 
       if (board[row][col] === 0) {
-        Array.from(rows[row].children)[col].className = 'field-cell';
         Array.from(rows[row].children)[col].textContent = '';
+        Array.from(rows[row].children)[col].className = 'field-cell';
       }
 
       if (board[row][col] === 2048) {
@@ -84,17 +78,16 @@ function updateBoard(board) {
       }
     }
   }
-
   score.textContent = game.score;
   game.status = game.getStatus();
-  updateMessage();
-  game.isMoves(game.board);
+  updateMessages();
+  game.hasOtherMoves(game.board);
 }
 
-function isBoardChanged(boardBefore, boardAfter) {
-  for (let row = 0; row < 4; row++) {
-    for (let col = 0; col < 4; col++) {
-      if (boardBefore[row][col] !== boardAfter[row][col]) {
+function isBoardChanged(beforeArr, afterArr) {
+  for (let i = 0; i < 4; i++) {
+    for (let j = 0; j < 4; j++) {
+      if (beforeArr[i][j] !== afterArr[i][j]) {
         return true;
       }
     }
@@ -108,7 +101,7 @@ document.addEventListener('keydown', (e) => {
     return;
   }
 
-  const gameBefore = game.getState();
+  const boardBefore = game.getState();
 
   switch (e.key) {
     case 'ArrowLeft':
@@ -127,8 +120,8 @@ document.addEventListener('keydown', (e) => {
       return;
   }
 
-  if (isBoardChanged(gameBefore, game.board)) {
-    game.setValue(game.board);
+  if (isBoardChanged(boardBefore, game.board)) {
+    game.addNumbers(game.board);
   }
 
   updateBoard(game.board);

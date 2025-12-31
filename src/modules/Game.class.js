@@ -1,4 +1,11 @@
+/* eslint-disable function-paren-newline */
 'use strict';
+
+/**
+ * This class represents the game.
+ * Now it has a basic structure, that is needed for testing.
+ * Feel free to add more props and methods if needed.
+ */
 class Game {
   /**
    * Creates a new game instance.
@@ -15,28 +22,27 @@ class Game {
    * initial state.
    */
   constructor(initialState) {
+    this.size = 4;
+
+    this.score = 0;
     this.status = 'idle';
 
-    this.field = [
+    this.board = [
       [0, 0, 0, 0],
       [0, 0, 0, 0],
       [0, 0, 0, 0],
       [0, 0, 0, 0],
     ];
-    this.score = 0;
   }
 
   getRandomNumber(min, max) {
-    const minCeil = Math.ceil(min);
-    const maxFloor = Math.floor(max);
-    const randomNumber = Math.floor(
-      Math.random() * (maxFloor - minCeil) + minCeil,
-    );
+    const minCeiled = Math.ceil(min);
+    const maxFloored = Math.floor(max);
 
-    return randomNumber;
+    return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled);
   }
 
-  setStartNumber() {
+  startNumbers() {
     const randomValue = Math.random() < 0.9 ? 2 : 4;
 
     this.board[this.getRandomNumber(0, 4)][this.getRandomNumber(0, 4)] =
@@ -44,22 +50,22 @@ class Game {
     this.board[this.getRandomNumber(0, 4)][this.getRandomNumber(0, 4)] = 2;
   }
 
-  setValue(array) {
-    const emptyCell = [];
+  addNumbers(array) {
+    const empty = [];
 
-    for (let addRow = 0; addRow < 4; addRow++) {
-      for (let addCol = 0; addCol < 4; addCol++) {
-        if (array[addRow][addCol] === 0) {
-          emptyCell.push([addRow, addCol]);
+    for (let rowAdd = 0; rowAdd < 4; rowAdd++) {
+      for (let colAdd = 0; colAdd < 4; colAdd++) {
+        if (array[rowAdd][colAdd] === 0) {
+          empty.push([rowAdd, colAdd]);
         }
       }
     }
 
-    if (emptyCell.length === 0) {
+    if (empty.length === 0) {
       return;
     }
 
-    const [row, col] = emptyCell[this.getRandomNumber(0, emptyCell.length)];
+    const [row, col] = empty[this.getRandomNumber(0, empty.length)];
     const value = Math.random() < 0.9 ? 2 : 4;
 
     array[row][col] = value;
@@ -70,21 +76,21 @@ class Game {
     let score = 0;
 
     for (const arr of array) {
-      const arrayFiltered = arr.filter((n) => n !== 0);
+      const filtered = arr.filter((num) => num !== 0);
 
-      for (let i = 0; i < arrayFiltered.length; i++) {
-        if (arrayFiltered[i] === arrayFiltered[i + 1]) {
-          arrayFiltered[i] += arrayFiltered[i + 1];
-          score += arrayFiltered[i];
-          arrayFiltered.splice(i + 1, 1);
+      for (let j = 0; j < filtered.length; j++) {
+        if (filtered[j] === filtered[j + 1]) {
+          filtered[j] += filtered[j + 1];
+          score += filtered[j];
+          filtered.splice(j + 1, 1);
         }
       }
 
-      while (arrayFiltered.length < 4) {
-        arrayFiltered.push(0);
+      while (filtered.length < 4) {
+        filtered.push(0);
       }
 
-      resArr.push(arrayFiltered);
+      resArr.push(filtered);
     }
 
     this.score += score;
@@ -92,27 +98,26 @@ class Game {
 
     return resArr;
   }
-
   moveRight(array) {
     const resArr = [];
     let score = 0;
 
     for (const arr of array) {
-      const arrayFiltered = arr.filter((n) => n !== 0);
+      const filtered = arr.filter((num) => num !== 0);
 
-      for (let j = 0; j < arrayFiltered.length; j++) {
-        if (arrayFiltered[j] === arrayFiltered[j + 1]) {
-          arrayFiltered[j] += arrayFiltered[j + 1];
-          score += arrayFiltered[j];
-          arrayFiltered.splice(j + 1, 1);
+      for (let i = 0; i < filtered.length; i++) {
+        if (filtered[i] === filtered[i + 1]) {
+          filtered[i] = filtered[i] + filtered[i + 1];
+          score += filtered[i];
+          filtered.splice(i + 1, 1);
         }
       }
 
-      while (arrayFiltered.length < 4) {
-        arrayFiltered.unshift(0);
+      while (filtered.length < 4) {
+        filtered.unshift(0);
       }
 
-      resArr.push(arrayFiltered);
+      resArr.push(filtered);
     }
 
     this.score += score;
@@ -120,10 +125,9 @@ class Game {
 
     return resArr;
   }
-
   moveUp(array) {
-    let score = 0;
     const resArr = Array.from({ length: 4 }, () => Array(4).fill(0));
+    let score = 0;
 
     for (let col = 0; col < 4; col++) {
       const column = [];
@@ -132,22 +136,22 @@ class Game {
         column.push(array[row][col]);
       }
 
-      const arrayFiltered = column.filter((c) => c !== 0);
+      const filtered = column.filter((num) => num !== 0);
 
-      for (let i = 0; i < arrayFiltered.length; i++) {
-        if (arrayFiltered[i] === arrayFiltered[i + 1]) {
-          arrayFiltered[i] += arrayFiltered[i + 1];
-          score += arrayFiltered[i];
-          arrayFiltered.splice(i + 1, 1);
+      for (let q = 0; q < filtered.length; q++) {
+        if (filtered[q] === filtered[q + 1]) {
+          filtered[q] += filtered[q + 1];
+          score += filtered[q];
+          filtered.splice(q + 1, 1);
         }
+      }
 
-        while (arrayFiltered.length < 4) {
-          arrayFiltered.push(0);
-        }
+      while (filtered.length < 4) {
+        filtered.push(0);
+      }
 
-        for (let row = 0; row < 4; row++) {
-          resArr[row][col] = arrayFiltered[row];
-        }
+      for (let row = 0; row < 4; row++) {
+        resArr[row][col] = filtered[row];
       }
     }
 
@@ -158,8 +162,9 @@ class Game {
   }
 
   moveDown(array) {
-    let score = 0;
     const resArr = Array.from({ length: 4 }, () => Array(4).fill(0));
+
+    let score = 0;
 
     for (let col = 0; col < 4; col++) {
       const column = [];
@@ -168,22 +173,22 @@ class Game {
         column.push(array[row][col]);
       }
 
-      const arrayFiltered = column.filter((c) => c !== 0);
+      const filtered = column.filter((num) => num !== 0);
 
-      for (let i = 0; i < arrayFiltered.length; i++) {
-        if (arrayFiltered[i] === arrayFiltered[i + 1]) {
-          arrayFiltered[i] += arrayFiltered[i + 1];
-          score += arrayFiltered[i];
-          arrayFiltered.splice(i + 1, 1);
+      for (let q = 0; q < filtered.length; q++) {
+        if (filtered[q] === filtered[q + 1]) {
+          filtered[q] += filtered[q + 1];
+          score += filtered[q];
+          filtered.splice(q + 1, 1);
         }
       }
 
-      while (arrayFiltered.length < 4) {
-        arrayFiltered.unshift(0);
+      while (filtered.length < 4) {
+        filtered.unshift(0);
       }
 
       for (let row = 0; row < 4; row++) {
-        resArr[row][col] = arrayFiltered[row];
+        resArr[row][col] = filtered[row];
       }
     }
     this.score += score;
@@ -192,10 +197,16 @@ class Game {
     return resArr;
   }
 
+  /**
+   * @returns {number}
+   */
   getScore() {
     return this.score;
   }
 
+  /**
+   * @returns {number[][]}
+   */
   getState() {
     return this.board.map((row) => [...row]);
   }
@@ -210,8 +221,7 @@ class Game {
    * `win` - the game is won;
    * `lose` - the game is lost
    */
-
-  isWin(array) {
+  hasWon(array) {
     for (let row = 0; row < 4; row++) {
       for (let col = 0; col < 4; col++) {
         if (array[row][col] === 2048) {
@@ -221,10 +231,12 @@ class Game {
     }
   }
 
-  isMoves(array) {
-    const numIsNull = array.every((row) => row.every((cell) => cell !== 0));
+  hasOtherMoves(array) {
+    const everyNumIsNull = array.every((row) =>
+      row.every((cell) => cell !== 0),
+    );
 
-    if (!numIsNull) {
+    if (!everyNumIsNull) {
       return true;
     }
 
@@ -236,33 +248,40 @@ class Game {
       }
     }
 
-    for (let row = 0; row < 3; row++) {
-      for (let col = 0; col < 4; col++) {
-        if (array[row][col] === array[row + 1][col]) {
+    for (let j = 0; j < 4; j++) {
+      for (let i = 0; i < 3; i++) {
+        if (array[i][j] === array[i + 1][j]) {
           return true;
         }
       }
     }
 
+    // console.log('no moves');
+
     return false;
   }
 
   getStatus() {
-    if (this.isMoves(this.board) === false) {
+    if (this.hasOtherMoves(this.board) === false) {
       this.status = 'lose';
     }
 
     return this.status;
   }
 
+  /**
+   * Starts the game.
+   */
   start() {
     this.status = 'playing';
   }
 
+  /**
+   * Resets the game.
+   */
+
   restart() {
     this.score = 0;
-
-    this.status = 'idle';
 
     this.board = [
       [0, 0, 0, 0],
@@ -270,6 +289,7 @@ class Game {
       [0, 0, 0, 0],
       [0, 0, 0, 0],
     ];
+    this.status = 'idle';
   }
 }
 
