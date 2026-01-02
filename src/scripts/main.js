@@ -36,9 +36,9 @@ buttonStart.addEventListener('click', (e) => {
 });
 
 function updateMessages() {
-  const stat = game.getStatus(); 
+  const stat = game.getStatus();
 
-  messageStart.classList.add('hidden');
+  messageStart.classList.add('hidden'); 
   messageWin.classList.add('hidden');
   messageLose.classList.add('hidden');
 
