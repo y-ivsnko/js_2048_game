@@ -15,11 +15,11 @@ const messageLose = document.querySelector('.message-lose');
 
 buttonStart.addEventListener('click', (e) => {
   e.target.textContent = 'Restart';
-  game.status = 'playing';
+  game.status = game.state.playing;
   buttonStart.className = 'button restart';
 
   if (game.status === 'idle') {
-    game.status = 'playing';
+    game.status = game.state.playing;
     updateBoard(game.board);
     updateMessages();
 
@@ -30,7 +30,7 @@ buttonStart.addEventListener('click', (e) => {
     updateMessages();
     game.restart();
     game.startNumbers();
-    game.status = 'playing';
+    game.status = game.state.playing;
     updateBoard(game.board);
   }
 });
@@ -38,29 +38,36 @@ buttonStart.addEventListener('click', (e) => {
 function updateMessages() {
   const stat = game.getStatus();
 
-  messageStart.classList.add('hidden'); 
+  messageStart.classList.add('hidden');
   messageWin.classList.add('hidden');
   messageLose.classList.add('hidden');
 
   if (game.hasOtherMoves(game.board) === false) {
-    game.status = 'lose';
+    game.status = game.state.lose;
     buttonStart.className = 'button restart';
     buttonStart.textContent = 'Restart';
   }
 
-  if (stat === 'idle') {
-    messageStart.classList.remove('hidden');
-  } else if (stat === 'playing') {
-  } else if (stat === 'win') {
-    messageWin.classList.remove('hidden');
-  } else if (stat === 'lose') {
-    messageLose.classList.remove('hidden');
+  switch (stat) {
+    case 'idle':
+      messageStart.classList.remove('hidden');
+      break;
+    case 'playing':
+      break;
+    case 'win':
+      messageWin.classList.remove('hidden');
+      break;
+    case 'lose':
+      messageLose.classList.remove('hidden');
+      break;
+    default:
+      return;
   }
 }
 
 function updateBoard(board) {
-  for (let row = 0; row < 4; row++) {
-    for (let col = 0; col < 4; col++) {
+  for (let row = 0; row < game.size; row++) {
+    for (let col = 0; col < game.size; col++) {
       Array.from(rows[row].children)[col].textContent = board[row][col];
 
       if (board[row][col] !== 0) {
@@ -73,8 +80,8 @@ function updateBoard(board) {
         Array.from(rows[row].children)[col].className = 'field-cell';
       }
 
-      if (board[row][col] === 2048) {
-        game.status = 'win';
+      if (board[row][col] === game.gameGoal) {
+        game.status = game.state.win;
       }
     }
   }
@@ -85,8 +92,8 @@ function updateBoard(board) {
 }
 
 function isBoardChanged(beforeArr, afterArr) {
-  for (let i = 0; i < 4; i++) {
-    for (let j = 0; j < 4; j++) {
+  for (let i = 0; i < game.size; i++) {
+    for (let j = 0; j < game.size; j++) {
       if (beforeArr[i][j] !== afterArr[i][j]) {
         return true;
       }

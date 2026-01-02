@@ -9,23 +9,30 @@
 class Game {
   /**
    * Creates a new game instance.
-   *
-   * @param {number[][]} initialState
-   * The initial state of the board.
-   * @default
-   * [[0, 0, 0, 0],
-   *  [0, 0, 0, 0],
-   *  [0, 0, 0, 0],
-   *  [0, 0, 0, 0]]
-   *
-   * If passed, the board will be initialized with the provided
-   * initial state.
-   */
-  constructor(initialState) {
-    this.size = 4;
+  *
+  * @param {number[][]} initialState
+  * The initial state of the board.
+  * @default
+  * [[0, 0, 0, 0],
+  *  [0, 0, 0, 0],
+  *  [0, 0, 0, 0],
+  *  [0, 0, 0, 0]]
+  *
+  * If passed, the board will be initialized with the provided
+  * initial state.
+  */
+ constructor(initialState) {
+    this.state = {
+      idle: 'idle',
+      playing: 'playing',
+      win: 'win',
+      lose: 'lose',
+    };
 
+    this.gameGoal = 2048;
+    this.size = 4;
     this.score = 0;
-    this.status = 'idle';
+    this.status = this.state.idle;
 
     this.board = [
       [0, 0, 0, 0],
@@ -43,18 +50,26 @@ class Game {
   }
 
   startNumbers() {
-    const randomValue = Math.random() < 0.9 ? 2 : 4;
+    const smallValue = 2;
+    const largeValue = 4;
+    const probabilityRatio = 0.9;
 
-    this.board[this.getRandomNumber(0, 4)][this.getRandomNumber(0, 4)] =
+    const randomValue = Math.random() < probabilityRatio ? smallValue : largeValue;
+
+    this.board[this.getRandomNumber(0, this.size)][this.getRandomNumber(0, this.size)] =
       randomValue;
-    this.board[this.getRandomNumber(0, 4)][this.getRandomNumber(0, 4)] = 2;
+    this.board[this.getRandomNumber(0, this.size)][this.getRandomNumber(0, this.size)] = smallValue;
   }
 
   addNumbers(array) {
+    const smallValue = 2;
+    const largeValue = 4;
+    const probabilityRatio = 0.9;
+
     const empty = [];
 
-    for (let rowAdd = 0; rowAdd < 4; rowAdd++) {
-      for (let colAdd = 0; colAdd < 4; colAdd++) {
+    for (let rowAdd = 0; rowAdd < this.size; rowAdd++) {
+      for (let colAdd = 0; colAdd < this.size; colAdd++) {
         if (array[rowAdd][colAdd] === 0) {
           empty.push([rowAdd, colAdd]);
         }
@@ -66,7 +81,7 @@ class Game {
     }
 
     const [row, col] = empty[this.getRandomNumber(0, empty.length)];
-    const value = Math.random() < 0.9 ? 2 : 4;
+    const value = Math.random() < probabilityRatio ? smallValue : largeValue;
 
     array[row][col] = value;
   }
@@ -86,7 +101,7 @@ class Game {
         }
       }
 
-      while (filtered.length < 4) {
+      while (filtered.length < this.size) {
         filtered.push(0);
       }
 
@@ -113,7 +128,7 @@ class Game {
         }
       }
 
-      while (filtered.length < 4) {
+      while (filtered.length < this.size) {
         filtered.unshift(0);
       }
 
@@ -126,13 +141,13 @@ class Game {
     return resArr;
   }
   moveUp(array) {
-    const resArr = Array.from({ length: 4 }, () => Array(4).fill(0));
+    const resArr = Array.from({ length: this.size }, () => Array(this.size).fill(0));
     let score = 0;
 
-    for (let col = 0; col < 4; col++) {
+    for (let col = 0; col < this.size; col++) {
       const column = [];
 
-      for (let row = 0; row < 4; row++) {
+      for (let row = 0; row < this.size; row++) {
         column.push(array[row][col]);
       }
 
@@ -146,11 +161,11 @@ class Game {
         }
       }
 
-      while (filtered.length < 4) {
+      while (filtered.length < this.size) {
         filtered.push(0);
       }
 
-      for (let row = 0; row < 4; row++) {
+      for (let row = 0; row < this.size; row++) {
         resArr[row][col] = filtered[row];
       }
     }
@@ -162,14 +177,14 @@ class Game {
   }
 
   moveDown(array) {
-    const resArr = Array.from({ length: 4 }, () => Array(4).fill(0));
+    const resArr = Array.from({ length: this.size }, () => Array(this.size).fill(0));
 
     let score = 0;
 
-    for (let col = 0; col < 4; col++) {
+    for (let col = 0; col < this.size; col++) {
       const column = [];
 
-      for (let row = 0; row < 4; row++) {
+      for (let row = 0; row < this.size; row++) {
         column.push(array[row][col]);
       }
 
@@ -183,11 +198,11 @@ class Game {
         }
       }
 
-      while (filtered.length < 4) {
+      while (filtered.length < this.size) {
         filtered.unshift(0);
       }
 
-      for (let row = 0; row < 4; row++) {
+      for (let row = 0; row < this.size; row++) {
         resArr[row][col] = filtered[row];
       }
     }
@@ -222,9 +237,9 @@ class Game {
    * `lose` - the game is lost
    */
   hasWon(array) {
-    for (let row = 0; row < 4; row++) {
-      for (let col = 0; col < 4; col++) {
-        if (array[row][col] === 2048) {
+    for (let row = 0; row < this.size; row++) {
+      for (let col = 0; col < this.size; col++) {
+        if (array[row][col] === this.gameGoal) {
           return true;
         }
       }
@@ -240,16 +255,16 @@ class Game {
       return true;
     }
 
-    for (let row = 0; row < 4; row++) {
-      for (let col = 0; col < 3; col++) {
+    for (let row = 0; row < this.size; row++) {
+      for (let col = 0; col < this.size - 1; col++) {
         if (array[row][col] === array[row][col + 1]) {
           return true;
         }
       }
     }
 
-    for (let j = 0; j < 4; j++) {
-      for (let i = 0; i < 3; i++) {
+    for (let j = 0; j < this.size; j++) {
+      for (let i = 0; i < this.size - 1; i++) {
         if (array[i][j] === array[i + 1][j]) {
           return true;
         }
@@ -263,7 +278,7 @@ class Game {
 
   getStatus() {
     if (this.hasOtherMoves(this.board) === false) {
-      this.status = 'lose';
+      this.status = this.state.lose;
     }
 
     return this.status;
@@ -273,7 +288,7 @@ class Game {
    * Starts the game.
    */
   start() {
-    this.status = 'playing';
+    this.status = this.state.playing;
   }
 
   /**
@@ -289,7 +304,7 @@ class Game {
       [0, 0, 0, 0],
       [0, 0, 0, 0],
     ];
-    this.status = 'idle';
+    this.status = this.state.idle;
   }
 }
 
